@@ -22,7 +22,7 @@ class VideoData(object):
         if self.dim=="1D": # for FCSN_1D
             video_feature = torch.from_numpy(video["feature"][...]).transpose(1,0).view(1024,-1) # [320,1024] -> [1024,320]
         else:
-            video_feature = torch.from_numpy(video["feature"][...]).transpose(1,0).view(1,1024,1,-1) #[320,1024] -> [1,1024,1,320]
+            video_feature = torch.from_numpy(video["feature"][...]).transpose(1,0).view(1024,1,-1) #[320,1024] -> [1024,1,320]
 
         video_label = torch.from_numpy(video["label"][...]).type(torch.long) # [320,]
         
@@ -40,7 +40,8 @@ def get_loader(path, dim, batch_size=5):
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size)
 
-    # train_loader: batch [5,1024,320], [5,320], [5,] -> feature, label, index
+    # train_loader(1D): batch [5,1024,320], [5,320], [5,] -> feature, label, index
+    # train_loader(2D): batch [5,1024,1,320], [5,320], [5,] -> feature, label, index
     # test_dataset: [(video_index1_feature,video_index1_label,index1), (video_index11_feature,video_index11_label,index11)...]
     # dataset.data_file is the whole *.h5 file
     return train_loader,test_dataset,dataset.data_file

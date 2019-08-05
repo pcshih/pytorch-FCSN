@@ -292,7 +292,7 @@ if __name__ == '__main__':
 
     model = FCSN_2D(n_class=2)
     model.to(device)
-    data = torch.randn(1, 1024, 1, 320).to(device)
+    data = torch.randn(5, 1024, 1, 320).to(device)
     print(model(data).shape)
     
     

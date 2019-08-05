@@ -11,13 +11,13 @@ from FCSN import *
 import eval_tools
 
 # load training and testing dataset
-train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "1D", 5)
+train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "2D", 5)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
 EPOCHS = 50
 # model declaration
-model = FCSN_1D()
+model = FCSN_2D()
 # optimizer declaration
 optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
 # switch to train mode
@@ -30,7 +30,7 @@ writer = SummaryWriter()
 
 for epoch in range(EPOCHS):
     for batch_i, (feature,label,_) in enumerate(train_loader):
-        feature = feature.to(device) #[5,1024,320]
+        feature = feature.to(device) #[5,1024,1,320]
         label = label.to(device) #[5,320]
 
         # reshape
@@ -44,10 +44,10 @@ for epoch in range(EPOCHS):
 
         # zero the parameter gradients
         optimizer.zero_grad()
-        outputs = model(feature) # output shape [5,2,320]
+        outputs = model(feature) # output shape [5,2,1,320]
 
         # reshape output
-        outputs = outputs.permute(0,2,1).contiguous().view(-1,2) #[5*320,2] 2 choices prob., non-key or key
+        outputs = outputs.permute(0,3,2,1).contiguous().view(-1,2) #[5*320,2] 2 choices prob., non-key or key
 
         loss = criterion(outputs, label)
         loss.backward()
@@ -58,8 +58,8 @@ for epoch in range(EPOCHS):
         model.eval()
         eval_res_avg = [] # for all testing video results
         for feature,label,index in test_dataset: # index has been +1 in dataloader.py
-            feature = feature.view(1,1024,-1).to(device) # [1024,320] -> [1,1024,320]
-            pred_score = model(feature).view(-1,320) # [1,2,320] -> [2,320]
+            feature = feature.view(1,1024,1,-1).to(device) # [1024,1,320] -> [1,1024,1,320]
+            pred_score = model(feature).view(-1,320) # [1,2,1,320] -> [2,320]
             # we only want key frame prob. -> [1]
             pred_score = torch.softmax(pred_score, dim=0)[1] # [320]
             
@@ -80,8 +80,8 @@ for epoch in range(EPOCHS):
         fscore = eval_res_avg[2]
         print("epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(epoch, precision, recall, fscore))
 
-        writer.add_scalar("eval_1D_X_epoch/precision", precision, epoch, time.time())   # tag, Y, X -> 當Y只有一個時
-        writer.add_scalar("eval_1D_X_epoch/recall", recall, epoch, time.time())
-        writer.add_scalar("eval_1D_X_epoch/fscore", fscore, epoch, time.time())
+        writer.add_scalar("eval_2D_X_epoch/precision", precision, epoch, time.time())   # tag, Y, X -> 當Y只有一個時
+        writer.add_scalar("eval_2D_X_epoch/recall", recall, epoch, time.time())
+        writer.add_scalar("eval_2D_X_epoch/fscore", fscore, epoch, time.time())
 
         model.train()
