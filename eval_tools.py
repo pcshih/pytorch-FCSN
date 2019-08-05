@@ -6,8 +6,8 @@ from knapsack import knapsack
 
 def eval_metrics(y_pred, y_true):
     overlap = np.sum(y_pred * y_true)
-    precision = overlap / (np.sum(y_pred) + 1e-8)
-    recall = overlap / (np.sum(y_true) + 1e-8)
+    precision = overlap / (np.sum(y_pred) + 1e-8) # 預測為1且真正為1
+    recall = overlap / (np.sum(y_true) + 1e-8) # 真正為1且model預測為1
     if precision == 0 and recall == 0:
         fscore = 0
     else:
@@ -26,12 +26,12 @@ def select_keyshots(video_info, pred_score):
     weight = video_info['n_frame_per_seg'][()] # shape [n_segments], number of frames in each segment
     pred_score = pred_score.to("cpu").detach().numpy() # GPU->CPU, requires_grad=False, to numpy
     pred_score = upsample(pred_score, N) # Use Nearest Neighbor to extend from 320 to N
-    pred_value = np.array([pred_score[cp[0]:cp[1]].mean() for cp in cps]) # [n_segments]
+    pred_value = np.array([pred_score[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
     _, selected = knapsack(pred_value, weight, int(0.15 * N)) # selected -> [66, 64, 51, 50, 44, 41, 40, 38, 34, 33, 31, 25, 24, 23, 20, 10, 9]
     selected = selected[::-1] # inverse the selected list, which seg is selected
     key_labels = np.zeros(shape=(N, ))
     for i in selected:
-        key_labels[cps[i][0]:cps[i][1]] = 1 # assign 1 to seg
+        key_labels[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
     # pred_score: shape [n_segments]
     # selected: which seg is selected
     # key_labels: assign 1 to selected seg

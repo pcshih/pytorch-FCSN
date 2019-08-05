@@ -15,7 +15,7 @@ train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "2D",
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
-EPOCHS = 50
+EPOCHS = 100
 # model declaration
 model = FCSN_2D()
 # optimizer declaration
