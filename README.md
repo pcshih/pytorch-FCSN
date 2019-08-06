@@ -2,10 +2,11 @@
 This is the implementation of FCSN.
 
 ## Loss
-- 1D
+### summe
+![](imgs/FCSN_1D_summe_eval.PNG)
+![](imgs/FCSN_2D_summe_eval.PNG)
 
-![](imgs/FCSN_1D_loss.PNG)
 
-- 2D
-
-![](imgs/FCSN_2D_loss.PNG)
+### tvsum
+![](imgs/FCSN_1D_tvsum_eval.PNG)
+![](imgs/FCSN_2D_tvsum_eval.PNG)

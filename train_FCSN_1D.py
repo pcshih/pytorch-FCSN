@@ -11,7 +11,7 @@ from FCSN import *
 import eval_tools
 
 # load training and testing dataset
-train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "1D", 5)
+train_loader,test_dataset,data_file = get_loader("datasets/fcsn_summe.h5", "1D", 5)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
@@ -25,7 +25,7 @@ model.train()
 # put model in to device
 model.to(device)
 # configure training record
-writer = SummaryWriter()
+#writer = SummaryWriter()
 
 
 for epoch in range(EPOCHS):
@@ -80,8 +80,8 @@ for epoch in range(EPOCHS):
         fscore = eval_res_avg[2]
         print("epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(epoch, precision, recall, fscore))
 
-        writer.add_scalar("eval_1D_X_epoch/precision", precision, epoch, time.time())   # tag, Y, X -> 當Y只有一個時
-        writer.add_scalar("eval_1D_X_epoch/recall", recall, epoch, time.time())
-        writer.add_scalar("eval_1D_X_epoch/fscore", fscore, epoch, time.time())
+        #writer.add_scalar("eval_1D_X_epoch/precision", precision, epoch, time.time())   # tag, Y, X -> 當Y只有一個時
+        #writer.add_scalar("eval_1D_X_epoch/recall", recall, epoch, time.time())
+        #writer.add_scalar("eval_1D_X_epoch/fscore", fscore, epoch, time.time())
 
         model.train()

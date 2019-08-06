@@ -11,7 +11,7 @@ from FCSN import *
 import eval_tools
 
 # load training and testing dataset
-train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "2D", 5)
+train_loader,test_dataset,data_file = get_loader("datasets/fcsn_summe.h5", "2D", 5)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
