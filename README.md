@@ -1,7 +1,7 @@
 # pytorch-FCSN
 This is the implementation of FCSN.
 
-## Loss
+## Evaluation
 ### summe(max)
 ![](imgs/FCSN_paper_summe.PNG)
 ![](imgs/FCSN_1D_summe_eval_max_5split_100epoch.PNG)
