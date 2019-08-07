@@ -104,7 +104,7 @@ def get_oracle_summary_self(user_summary):
             fscore = eval_tools.eval_metrics(y_pred,y_true)[2] # only get fscore
             n_user_fscore[usr_i] = fscore
 
-        cur_fscore = n_user_fscore.() # avg. of each sum to fake sum
+        cur_fscore = n_user_fscore.mean() # avg. of each sum to fake sum
         if cur_fscore > best_fscore:
             best_fscore = cur_fscore
         else:
@@ -126,7 +126,7 @@ def video2fea(video_path, h5_f):
     usr_sum_arr = vsumm_data['video_'+idx]['user_summary'][...]  # i.e. [15, 4494] binary vector
     cps = vsumm_data['video_'+idx]['change_points'][...] # [n_segs, 2]
     n_frame_per_seg = vsumm_data['video_'+idx]['n_frame_per_seg'][...] #[n_segs]
-    usr_sum = get_oracle_summary(usr_sum_arr) # i.e. [15,4494] -> [4494] binary vector, get authentic key frame indication
+    #usr_sum = get_oracle_summary(usr_sum_arr) # i.e. [15,4494] -> [4494] binary vector, get authentic key frame indication
     usr_sum = get_oracle_summary_self(usr_sum_arr) # i.e. [15,4494] -> [4494] binary vector, get authentic key frame indication
     i = 0
     success, frame = video.read()
