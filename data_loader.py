@@ -35,17 +35,28 @@ def get_loader(path, dim, batch_size=5):
     """
     dataset = VideoData(path, dim)
 
-    # train_dataset: [(video_index1_feature,video_index1_label,index1)...]
-    train_dataset,test_dataset = torch.utils.data.random_split(dataset, [int(dataset.__len__()*0.8), int(dataset.__len__()*0.2)])
+    train_loader_list = []
+    test_dataset_list = []
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size)
+    # split 5 times for validation
+    split_times = 5
 
-    # train_loader(1D): batch [5,1024,320], [5,320], [5,] -> feature, label, index
-    # train_loader(2D): batch [5,1024,1,320], [5,320], [5,] -> feature, label, index
-    # test_dataset: [(video_index1_feature,video_index1_label,index1), (video_index11_feature,video_index11_label,index11)...]
-    # dataset.data_file is the whole *.h5 file
-    return train_loader,test_dataset,dataset.data_file
+    for i in range(split_times):
+        # train_dataset: [(video_index1_feature,video_index1_label,index1)...]
+        train_dataset,test_dataset = torch.utils.data.random_split(dataset, [int(dataset.__len__()*0.8), int(dataset.__len__()*0.2)])
+
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size)
+
+        # train_loader(1D): batch [5,1024,320], [5,320], [5,] -> feature, label, index
+        # train_loader(2D): batch [5,1024,1,320], [5,320], [5,] -> feature, label, index
+        # test_dataset: [(video_index1_feature,video_index1_label,index1), (video_index11_feature,video_index11_label,index11)...]
+        # dataset.data_file is the whole *.h5 file
+        train_loader_list.append(train_loader)
+        test_dataset_list.append(test_dataset)
+    
+
+    return train_loader_list,test_dataset_list,dataset.data_file
 
 if __name__ == "__main__":
-    train_loader,test_dataset,data_file = get_loader("datasets/fcsn_tvsum.h5", "1D", 5)
+    train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_tvsum.h5", "1D", 5)
 

@@ -14,9 +14,9 @@ import eval_tools
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--video_dir', type=str, help='directory containing mp4 file of specified dataset.', default='/media/data/PTec131b/VideoSum/SumMe/video')
-parser.add_argument('--h5_path', type=str, help='save path of the generated dataset, which should be a hdf5 file.', default='datasets/fcsn_summe.h5')
-parser.add_argument('--vsumm_data', type=str, help='preprocessed dataset path from this repo: https://github.com/KaiyangZhou/pytorch-vsumm-reinforce, which should be a hdf5 file. We copy cps and some other info from it.', default='/media/data/PTec131b/VideoSum/SumMe/eccv16_dataset_summe_google_pool5.h5')
+parser.add_argument('--video_dir', type=str, help='directory containing mp4 file of specified dataset.', default='/media/data/PTec131b/VideoSum/TVsum/video')
+parser.add_argument('--h5_path', type=str, help='save path of the generated dataset, which should be a hdf5 file.', default='datasets/fcsn_tvsum.h5')
+parser.add_argument('--vsumm_data', type=str, help='preprocessed dataset path from this repo: https://github.com/KaiyangZhou/pytorch-vsumm-reinforce, which should be a hdf5 file. We copy cps and some other info from it.', default='/media/data/PTec131b/VideoSum/TVsum/eccv16_dataset_tvsum_google_pool5.h5')
 
 args = parser.parse_args()
 video_dir = args.video_dir # directory containing *.mp4 file
