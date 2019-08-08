@@ -10,26 +10,27 @@ from data_loader import get_loader
 from FCSN import *
 import eval_tools
 
+# configure training record
+#writer = SummaryWriter()
 # load training and testing dataset
-train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_tvsum.h5", "2D", 5)
+train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_summe.h5", "2D", 5)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
 EPOCHS = 100
-# model declaration
-model = FCSN_2D()
-# optimizer declaration
-optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-# switch to train mode
-model.train()
-# put model in to device
-model.to(device)
-# configure training record
-#writer = SummaryWriter()
 # array for calc. eval fscore
 fscore_arr = np.zeros(len(train_loader_list))
 
+
 for i in range(len(train_loader_list)):
+    # model declaration
+    model = FCSN_2D()
+    # optimizer declaration
+    optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    # switch to train mode
+    model.train()
+    # put model in to device
+    model.to(device)
     for epoch in range(EPOCHS):
         for batch_i, (feature,label,_) in enumerate(train_loader_list[i]):
             feature = feature.to(device) #[5,1024,1,320]
@@ -73,8 +74,8 @@ for i in range(len(train_loader_list)):
                 _, _, pred_summary = eval_tools.select_keyshots(video_info, pred_score)
                 true_summary_arr = video_info['user_summary'][()] # shape (20,N), summary from 20 users, each row is a binary vector
                 eval_res = [eval_tools.eval_metrics(pred_summary, true_summary) for true_summary in true_summary_arr] # shape [20,3] 20 for users,3 for[precision, recall, fscore]
-                eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
-                #eval_res = np.max(eval_res, axis=0).tolist()    # for summe
+                #eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
+                eval_res = np.max(eval_res, axis=0).tolist()    # for summe
                 eval_res_avg.append(eval_res) # [[precision1, recall1, fscore1], [precision2, recall2, fscore2]......]
 
             eval_res_avg = np.mean(eval_res_avg, axis=0).tolist()
@@ -83,16 +84,21 @@ for i in range(len(train_loader_list)):
             fscore = eval_res_avg[2]
             #print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
 
-            # store the last fscore for eval
+            model.train()
+
+            # store the last fscore for eval, and remove model from GPU
             if((epoch+1)==EPOCHS):
                 fscore_arr[i] = fscore
                 print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
+                # release model from GPU
+                model = model.cpu()
+                torch.cuda.empty_cache()
 
             #writer.add_scalar("eval_2D_X_epoch/precision", precision, epoch, time.time())   # tag, Y, X -> 當Y只有一個時
             #writer.add_scalar("eval_2D_X_epoch/recall", recall, epoch, time.time())
             #writer.add_scalar("eval_2D_X_epoch/fscore", fscore, epoch, time.time())
 
-            model.train()
+            
 
 
 # print eval fscore
