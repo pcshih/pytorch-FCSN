@@ -1,5 +1,6 @@
 import torch
 
+# deprecated
 class SoftArgmax(torch.nn.Module):
     """
     Implementation of a 1d soft arg-max function as an nn.Module, so that we can differentiate through arg-max operations.
@@ -38,7 +39,7 @@ class SoftArgmax(torch.nn.Module):
         
 
 if __name__ == "__main__":
-    h = torch.randn(5, 2, 320, requires_grad=True); print(h)
+    h = torch.randn(3, 2, 4, requires_grad=True, device="cuda:0"); print(h)
 
     print(SoftArgmax()(h))
     val,idx = h.max(1, keepdim=True); print(idx)    

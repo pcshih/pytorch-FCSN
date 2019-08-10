@@ -212,7 +212,15 @@ class FCSN_1D_unsup(nn.Module):
         self.deconv1 = nn.ConvTranspose1d(n_class, n_class, 4, padding=1, stride=2, bias=False)
         self.deconv2 = nn.ConvTranspose1d(n_class, n_class, 16, stride=16, bias=False)
 
-        self.conv_reconstuct = nn.Conv1d(n_class, 1024, 1)
+        self.conv_reconstuct1 = nn.Conv1d(n_class, 1024, 1)
+        self.bn_reconstruct1 = nn.BatchNorm1d(1024)
+        self.relu_reconstuct1 = nn.ReLU(inplace=True)
+
+        self.conv_reconstuct2 = nn.Conv1d(1024, 1024, 1)
+        self.bn_reconstruct2 = nn.BatchNorm1d(1024)
+        self.relu_reconstuct2 = nn.ReLU(inplace=True)
+
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
 
@@ -239,13 +247,22 @@ class FCSN_1D_unsup(nn.Module):
 
         h = self.deconv2(h) # [5,2,320]
 
-        # soft arg max
-        h_soft_argmax = self.soft_argmax(h); #print(h_soft_argmax) # [5,1,320]
+        h_softmax = self.softmax(h) # [5,2,320]
+        h_softmax_slice = h_softmax[:,1,:].view(-1,1,320) # [5,1,320]
+        mask = torch.bernoulli(h_softmax_slice) # [5,1,320]
 
-        h_select = h_soft_argmax*h # [5,2,320]
-        h_select_reconstruct = self.conv_reconstuct(h_select) # [5,1024,320]
+        # soft arg max(deprecated)
+        #mask = self.soft_argmax(h); #print(h_soft_argmax) # [5,1,320]
 
-        return h_select_reconstruct,h_soft_argmax
+        h_select = mask * h # [5,2,320]
+        h_select_reconstruct = self.relu_reconstuct1(self.bn_reconstruct1(self.conv_reconstuct1(h_select))) # [5,1024,320]
+
+        # merge with input features
+        refined_input = mask * x
+        h_select_reconstruct = h_select_reconstruct + refined_input
+        h_select_reconstruct = self.relu_reconstuct2(self.bn_reconstruct2(self.conv_reconstuct2(h_select_reconstruct))) # [5,1024,320]
+
+        return h_select_reconstruct, mask, h # [5,1024,320], [5,1,320], [5,2,320]
 
 
 class FCSN_2D_sup(nn.Module):
