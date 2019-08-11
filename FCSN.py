@@ -248,21 +248,21 @@ class FCSN_1D_unsup(nn.Module):
         h = self.deconv2(h) # [5,2,320]
 
         h_softmax = self.softmax(h) # [5,2,320]
-        h_softmax_slice = h_softmax[:,1,:].view(-1,1,320) # [5,1,320]
-        mask = torch.bernoulli(h_softmax_slice) # [5,1,320]
+        mask = h_softmax[:,1,:].view(-1,1,320) # [5,1,320] use key frame score to be the mask
+
+        # cannot differentiate(deprecated)
+        #mask = torch.bernoulli(h_softmax_slice) # [5,1,320]
 
         # soft arg max(deprecated)
         #mask = self.soft_argmax(h); #print(h_soft_argmax) # [5,1,320]
 
-        h_select = mask * h # [5,2,320]
-        h_select_reconstruct = self.relu_reconstuct1(self.bn_reconstruct1(self.conv_reconstuct1(h_select))) # [5,1024,320]
+        h_reconstruct = self.relu_reconstuct1(self.bn_reconstruct1(self.conv_reconstuct1(h))) # [5,1024,320]
 
         # merge with input features
-        refined_input = mask * x
-        h_select_reconstruct = h_select_reconstruct + refined_input
-        h_select_reconstruct = self.relu_reconstuct2(self.bn_reconstruct2(self.conv_reconstuct2(h_select_reconstruct))) # [5,1024,320]
+        h_merge = h_reconstruct + x # [5,1024,320]
+        h_merge_reconstruct = self.relu_reconstuct2(self.bn_reconstruct2(self.conv_reconstuct2(h_merge))) # [5,1024,320]
 
-        return h_select_reconstruct, mask, h # [5,1024,320], [5,1,320], [5,2,320]
+        return h_merge_reconstruct, mask, h # [5,1024,320], [5,1,320], [5,2,320]
 
 
 class FCSN_2D_sup(nn.Module):
