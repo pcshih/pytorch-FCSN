@@ -3,6 +3,7 @@ import time
 
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import torch.optim as optim
 #from tensorboardX import SummaryWriter
 
@@ -21,12 +22,84 @@ EPOCHS = 100
 # array for calc. eval fscore
 fscore_arr = np.zeros(len(train_loader_list))
 
+# ref: https://gist.github.com/jeasinema/ed9236ce743c8efaf30fa2ff732749f5
+def weights_init(m):
+    '''
+    Usage:
+        model = Model()
+        model.apply(weight_init)
+    '''
+    if isinstance(m, nn.Conv1d):
+        init.normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.Conv2d):
+        #init.xavier_normal_(m.weight.data)
+        init.kaiming_normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.Conv3d):
+        init.xavier_normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.ConvTranspose1d):
+        init.normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.ConvTranspose2d):
+        #init.xavier_normal_(m.weight.data)
+        init.kaiming_normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.ConvTranspose3d):
+        init.xavier_normal_(m.weight.data)
+        if m.bias is not None:
+            init.normal_(m.bias.data)
+    elif isinstance(m, nn.BatchNorm1d):
+        init.normal_(m.weight.data, mean=1, std=0.02)
+        init.constant_(m.bias.data, 0)
+    elif isinstance(m, nn.BatchNorm2d):
+        init.normal_(m.weight.data, mean=1, std=0.02)
+        init.constant_(m.bias.data, 0)
+    elif isinstance(m, nn.BatchNorm3d):
+        init.normal_(m.weight.data, mean=1, std=0.02)
+        init.constant_(m.bias.data, 0)
+    elif isinstance(m, nn.Linear):
+        init.xavier_normal_(m.weight.data)
+        init.normal_(m.bias.data)
+    elif isinstance(m, nn.LSTM):
+        for param in m.parameters():
+            if len(param.shape) >= 2:
+                init.orthogonal_(param.data)
+            else:
+                init.normal_(param.data)
+    elif isinstance(m, nn.LSTMCell):
+        for param in m.parameters():
+            if len(param.shape) >= 2:
+                init.orthogonal_(param.data)
+            else:
+                init.normal_(param.data)
+    elif isinstance(m, nn.GRU):
+        for param in m.parameters():
+            if len(param.shape) >= 2:
+                init.orthogonal_(param.data)
+            else:
+                init.normal_(param.data)
+    elif isinstance(m, nn.GRUCell):
+        for param in m.parameters():
+            if len(param.shape) >= 2:
+                init.orthogonal_(param.data)
+            else:
+                init.normal_(param.data)
+
 
 for i in range(len(train_loader_list)):
     # model declaration
     model = FCSN_1D_unsup()
     # optimizer declaration
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    # apply init weights(bad performance)
+    #model.apply(weights_init)
     # switch to train mode
     model.train()
     # put model in to device
@@ -75,7 +148,7 @@ for i in range(len(train_loader_list)):
                 batch_similarity_matrix_filtered = similarity_matrix_filtered[j,:,:] # [320,320]
                 batch_mask = mask[j,:,:] # [1, 320]
                 if batch_mask.sum() < 2:
-                    #print("select less than 2 frames")
+                    #print("select less than 2 frames", batch_mask.sum())
                     batch_diversity_loss = 0
                 else:
                     batch_diversity_loss = (batch_similarity_matrix_filtered.sum()-batch_similarity_matrix_filtered.trace())/(batch_mask.sum()*(batch_mask.sum()-1))
@@ -85,6 +158,7 @@ for i in range(len(train_loader_list)):
 
             if acc_batch_size>0:
                 diversity_loss /= acc_batch_size
+                #print(acc_batch_size)
             else:
                 diversity_loss = 0
 
@@ -100,7 +174,7 @@ for i in range(len(train_loader_list)):
                 feature = feature.view(1,1024,-1).to(device) # [1024,320] -> [1,1024,320]
                 # we only want key frame prob. -> [1]
                 pred_score = model(feature)[1].view(320) # [1,1,320] -> [320]
-                
+
                 video_name = "video_{}".format(index)
                 video_info = data_file[video_name]
                 # select key shots by video_info and pred_score

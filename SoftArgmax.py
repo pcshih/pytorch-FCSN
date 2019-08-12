@@ -5,7 +5,7 @@ class SoftArgmax(torch.nn.Module):
     """
     Implementation of a 1d soft arg-max function as an nn.Module, so that we can differentiate through arg-max operations.
     """
-    def __init__(self, base_index=0, step_size=1, beta=100):
+    def __init__(self, base_index=0, step_size=1, beta=10):
         """
         The "arguments" are base_index, base_index+step_size, base_index+2*step_size, ... and so on for
         arguments at indices 0, 1, 2, ....
