@@ -30,7 +30,8 @@ def weights_init(m):
         model.apply(weight_init)
     '''
     if isinstance(m, nn.Conv1d):
-        init.normal_(m.weight.data)
+        init.kaiming_normal_(m.weight.data, mode='fan_out')
+        #init.normal_(m.weight.data)
         if m.bias is not None:
             init.normal_(m.bias.data)
     elif isinstance(m, nn.Conv2d):
@@ -56,7 +57,8 @@ def weights_init(m):
         if m.bias is not None:
             init.normal_(m.bias.data)
     elif isinstance(m, nn.BatchNorm1d):
-        init.normal_(m.weight.data, mean=1, std=0.02)
+        #init.normal_(m.weight.data, mean=1, std=0.02)
+        init.constant_(m.weight.data, 1)
         init.constant_(m.bias.data, 0)
     elif isinstance(m, nn.BatchNorm2d):
         init.normal_(m.weight.data, mean=1, std=0.02)
@@ -162,7 +164,14 @@ for i in range(len(train_loader_list)):
             else:
                 diversity_loss = 0
 
-            total_loss = reconstruct_loss + diversity_loss
+            # sparsity loss
+            sigma = 0.3
+            mask_mean = torch.mean(mask, dim=2) # [5,1]
+            mask_mean = torch.sum(mask_mean, dim=1) # [5]
+            sigma_vector =  torch.ones([batch_size], device=device)*sigma # [5]
+            sparsity_loss = torch.mean((sigma_vector-mask_mean)**2)
+
+            total_loss = reconstruct_loss + diversity_loss + sparsity_loss
             total_loss.backward()
             optimizer.step()
 
@@ -174,6 +183,8 @@ for i in range(len(train_loader_list)):
                 feature = feature.view(1,1024,-1).to(device) # [1024,320] -> [1,1024,320]
                 # we only want key frame prob. -> [1]
                 pred_score = model(feature)[1].view(320) # [1,1,320] -> [320]
+
+                #print(index, pred_score)
 
                 video_name = "video_{}".format(index)
                 video_info = data_file[video_name]

@@ -45,7 +45,8 @@ def get_loader(path, dim, batch_size=5):
         # train_dataset: [(video_index1_feature,video_index1_label,index1)...]
         train_dataset,test_dataset = torch.utils.data.random_split(dataset, [int(dataset.__len__()*0.8), int(dataset.__len__()*0.2)])
 
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size)
+        # shuffle (bool, optional): set to `True` to have the data reshuffled at every epoch
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True)
 
         # train_loader(1D): batch [5,1024,320], [5,320], [5,] -> feature, label, index
         # train_loader(2D): batch [5,1024,1,320], [5,320], [5,] -> feature, label, index
