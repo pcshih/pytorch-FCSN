@@ -60,14 +60,16 @@ if __name__ == "__main__":
     #values = list(map(int, input().split()))
     #weights = list(map(int, input().split()))
     #max_weight = int(input())
-    values = np.array([450,570,225,110,670])
-    weights = np.array([4,5,2,1,6])
-    max_weight = 8
+    values = np.array([0.7,0.15,0.75])
+    weights = np.array([2,2,2])
+    max_weight = int(5)
 
     max_value, chosen = knapsack(values, weights, max_weight)
 
     print("The max value possible is")
     print(max_value)
 
-    print("The index chosen for these are")
-    print(' '.join(str(x) for x in chosen))
+    #print("The index chosen for these are")
+    #print(' '.join(str(x) for x in chosen))
+
+    print(chosen[::-1])

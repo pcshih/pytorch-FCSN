@@ -80,27 +80,35 @@ class SoftArgmax1D(torch.nn.Module):
 # mask_sum = torch.sum(mask_sum, dim=1); print(mask_sum)
 # print(h_sum/mask_sum)
 
-a = np.array(list(range(0, 24))).astype(np.float32)
-a = torch.tensor(a, requires_grad=True); #print(a)
-a = a.view(3,2,4); #print(a)
-#a_trans = a.permute(0,2,1); print(a_trans)
-a_norm = torch.norm(a, p=2, dim=1, keepdim=True); #print(a_norm)
+# a = np.array(list(range(0, 24))).astype(np.float32)
+# a = torch.tensor(a, requires_grad=True); #print(a)
+# a = a.view(3,2,4); #print(a)
+# #a_trans = a.permute(0,2,1); print(a_trans)
+# a_norm = torch.norm(a, p=2, dim=1, keepdim=True); #print(a_norm)
 
-a_normalized = a/a_norm; print(a_normalized) # [3,2,4]
-a_normalized_trans = a_normalized.permute(0,2,1); print(a_normalized_trans) # [3,4,2] 
+# a_normalized = a/a_norm; print(a_normalized) # [3,2,4]
+# a_normalized_trans = a_normalized.permute(0,2,1); print(a_normalized_trans) # [3,4,2] 
 
-tem = torch.bmm(a_normalized_trans, a_normalized); print(tem) # [3,4,4]
+# tem = torch.bmm(a_normalized_trans, a_normalized); print(tem) # [3,4,4]
 
-div_loss = 0
+# div_loss = 0
 
-mask = torch.tensor([[[1.0,0.0,1.0,1.0]],[[1.0,1.0,0.0,0.0]],[[1.0,0.0,0.0,0.0]]], requires_grad=True); print(mask.shape, mask)
-mask_trans = mask.permute(0,2,1)
-mask_matrix = torch.bmm(mask_trans, mask); print(mask_matrix) # [3,4,4]
+# mask = torch.tensor([[[1.0,0.0,1.0,1.0]],[[1.0,1.0,0.0,0.0]],[[1.0,0.0,0.0,0.0]]], requires_grad=True); print(mask.shape, mask)
+# mask_trans = mask.permute(0,2,1)
+# mask_matrix = torch.bmm(mask_trans, mask); print(mask_matrix) # [3,4,4]
 
-print(tem*mask_matrix)
+# print(tem*mask_matrix)
 
 
+# score = torch.tensor([[0.3, 0.5, 0.7, 1.0, 0.8],[0.1, 0.2, 0.3, 0.4, 0.5]], requires_grad=True)
+# med_score,_ = torch.median(score, dim=1, keepdim=True)
 
+# print(med_score)
+# print(score-med_score)
+# batch_variance = torch.mean((score-med_score)**2, dim=1)
+# print(batch_variance)
+# print(1.0/batch_variance)
+#print(torch.mean((score-med_score)**2))
 
 
 

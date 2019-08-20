@@ -1,6 +1,7 @@
 import torch
 
 import numpy as np
+from scipy import interpolate
 
 from knapsack import knapsack
 
@@ -25,17 +26,35 @@ def select_keyshots(video_info, pred_score):
     cps = video_info['change_points'][()] # shape [n_segments,2], stores begin and end of each segment in original length index
     weight = video_info['n_frame_per_seg'][()] # shape [n_segments], number of frames in each segment
     pred_score = pred_score.to("cpu").detach().numpy() # GPU->CPU, requires_grad=False, to numpy
-    pred_score = upsample(pred_score, N) # Use Nearest Neighbor to extend from 320 to N
-    pred_value = np.array([pred_score[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
-    _, selected = knapsack(pred_value, weight, int(0.15 * N)) # selected -> [66, 64, 51, 50, 44, 41, 40, 38, 34, 33, 31, 25, 24, 23, 20, 10, 9]
+    pred_score = upsample_self(pred_score, N) # Use Nearest Neighbor to extend from 320 to N
+    pred_score_key_frames = (pred_score>=0.5).type(torch.float32) # convert to key frames
+    value = np.array([pred_score_key_frames[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
+    _, selected = knapsack(value, weight, int(0.15 * N)) # selected -> [66, 64, 51, 50, 44, 41, 40, 38, 34, 33, 31, 25, 24, 23, 20, 10, 9]
     selected = selected[::-1] # inverse the selected list, which seg is selected
-    key_labels = np.zeros(shape=(N, ))
+    key_shots = np.zeros(shape=(N, ))
     for i in selected:
-        key_labels[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
-    # pred_score: shape [n_segments]
+        key_shots[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
+    # N: total video length
+    # pred_score: shape [N]
     # selected: which seg is selected
-    # key_labels: assign 1 to selected seg
-    return pred_score.tolist(), selected, key_labels.tolist()
+    # key_shots: assign 1 to selected seg
+    return N, pred_score.tolist(), selected, key_shots.tolist()
+
+def upsample_self(pred_score, N):
+    """
+    Use Nearest Neighbor to extend from 320 to N
+    input: 
+        pred_score: shape [320], indicates key frame prob.
+        N: scalar, video original length
+    output
+        up_arr: shape [N]
+    """
+    x = np.linspace(0, len(pred_score)-1, len(pred_score))
+    f = interpolate.interp1d(x, pred_score, kind='nearest')
+    x_new = np.linspace(0, N-1, N); print(x_new, N)
+    up_arr = f(x_new)
+
+    return up_arr
 
 
 def upsample(down_arr, N):
@@ -44,6 +63,8 @@ def upsample(down_arr, N):
     input: 
         down_arr: shape [320], indicates key frame prob.
         N: scalar, video original length
+    output
+        up_arr: shape [N]
     """
     up_arr = np.zeros(N) # get N zeros
     ratio = N // 320 # no rounding. i.e. 5//2 = 2

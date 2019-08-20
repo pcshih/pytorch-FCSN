@@ -374,7 +374,7 @@ class FCSN_1D_unsup_self(nn.Module):
         h = self.conv5(h)
         h = self.conv6(h)
         h_conv7 = self.conv7(h); #print("conv7 output shape:", h.shape) #[5,4096,10]
-        h_conv7_deconv = self.deconv_conv7(h); #print(h_conv7_deconv.shape)
+        h_conv7_deconv = self.deconv_conv7(h); #print(h_conv7_deconv.shape) #[4,4096,320]
         h = self.conv8(h_conv7); #print("conv8 output shape:", h.shape) #[5,2,10]
 
         h = self.deconv1(h); #print("deconv1 output shape:", h.shape) #[5,2,20]

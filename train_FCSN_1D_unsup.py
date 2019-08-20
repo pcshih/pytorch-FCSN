@@ -11,6 +11,7 @@ from data_loader import get_loader
 from FCSN import *
 import eval_tools
 
+
 # configure training record
 #writer = SummaryWriter()
 # load training and testing dataset
@@ -97,7 +98,7 @@ def weights_init(m):
 
 for i in range(len(train_loader_list)):
     # model declaration
-    model = FCSN_1D_unsup()
+    model = FCSN_1D_unsup_self()
     # optimizer declaration
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
     # apply init weights(bad performance)
@@ -165,13 +166,13 @@ for i in range(len(train_loader_list)):
                 diversity_loss = 0
 
             # sparsity loss
-            sigma = 0.3
-            mask_mean = torch.mean(mask, dim=2) # [5,1]
-            mask_mean = torch.sum(mask_mean, dim=1) # [5]
-            sigma_vector =  torch.ones([batch_size], device=device)*sigma # [5]
-            sparsity_loss = torch.mean((sigma_vector-mask_mean)**2)
+            #sigma = 0.3
+            #mask_mean = torch.mean(mask, dim=2) # [5,1]
+            #mask_mean = torch.sum(mask_mean, dim=1) # [5]
+            #sigma_vector =  torch.ones([batch_size], device=device)*sigma # [5]
+            #sparsity_loss = torch.mean((sigma_vector-mask_mean)**2)
 
-            total_loss = reconstruct_loss + diversity_loss + sparsity_loss
+            total_loss = reconstruct_loss + diversity_loss
             total_loss.backward()
             optimizer.step()
 
@@ -184,7 +185,7 @@ for i in range(len(train_loader_list)):
                 # we only want key frame prob. -> [1]
                 pred_score = model(feature)[1].view(320) # [1,1,320] -> [320]
 
-                #print(index, pred_score)
+                print(index, pred_score[:15])
 
                 video_name = "video_{}".format(index)
                 video_info = data_file[video_name]
