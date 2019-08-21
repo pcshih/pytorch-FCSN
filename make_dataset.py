@@ -272,8 +272,21 @@ def make_dataset_tvsum(videos_path, eccv16_data, GT_path, h5_data):
                 #print(GT_attr[4][0][0]) # test for consistency [4] for nframes
                 video_path = "{}/{}.mp4".format(videos_path, GT_video[0][0][0]) # [0] for video, [0][0] for getting value, each value store in 2d array
                 fea,label,cps,n_frame_per_seg,length = video2feature(video_path, idx, eccv16, GT_video[6])
-                # user_summary
-                usr_sum_arr = GT_video[5].transpose()
+                # user_summary -> convert multiple frame-level score to keyshot [20, length]
+                usr_sum_arr = []
+                user_anno = GT_video[5].transpose()
+                n_users, n_frame = user_anno.shape # 20,length
+                for user_score in user_anno:
+                    value = np.array([user_score[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
+                    _, selected = eval_tools.knapsack(value, n_frame_per_seg, int(0.15*length))
+                    selected = selected[::-1] # inverse the selected list, which seg is selected
+                    key_shots = np.zeros(shape=(length, ))
+                    for i in selected:
+                        # key shot processing
+                        key_shots[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
+                    usr_sum_arr.append(key_shots)
+                usr_sum_arr = np.asarray(usr_sum_arr) # convert to numpy array
+
 
                 # save to dataset
                 dataset = h5_f.create_group('video_'+idx)
@@ -306,7 +319,7 @@ def make_dataset_summe(videos_path, eccv16_data, GT_path, h5_data):
             idx = video_idx.split('_')[-1]
             fea,label,cps,n_frame_per_seg,length = video2feature(video_path, idx, eccv16, GT_mat['gt_score'])
             # user_summary
-            usr_sum_arr = GT_mat['user_score'].transpose()
+            usr_sum_arr = GT_mat['user_score'].transpose() # [15~18,length]
 
             # save to dataset
             dataset = h5_f.create_group('video_'+idx)

@@ -105,7 +105,7 @@ for i in range(len(train_loader_list)):
                 video_name = "video_{}".format(index)
                 video_info = data_file[video_name]
                 # select key shots by video_info and pred_score
-                # pred_summary: [N] binary
+                # pred_summary: [N] binary keyshot
                 N, pred_score_upsample, _, pred_summary = eval_tools.select_keyshots(video_info, pred_score)
                 true_summary_arr = video_info['user_summary'][()] # shape (n_users,N), summary from some users, each row is a binary vector
                 eval_res = [eval_tools.eval_metrics(pred_summary, true_summary) for true_summary in true_summary_arr] # shape [n_user,3],3 for[precision, recall, fscore]

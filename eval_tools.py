@@ -38,7 +38,7 @@ def select_keyshots(video_info, pred_score):
     # pred_score: shape [N]
     # selected: which seg is selected
     # key_shots: assign 1 to selected seg
-    return N, pred_score.tolist(), selected, key_shots.tolist()
+    return N, pred_score.tolist(), selected, key_shots
 
 def upsample_self(pred_score, N):
     """
