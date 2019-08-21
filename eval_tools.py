@@ -27,9 +27,9 @@ def select_keyshots(video_info, pred_score):
     weight = video_info['n_frame_per_seg'][()] # shape [n_segments], number of frames in each segment
     pred_score = pred_score.to("cpu").detach().numpy() # GPU->CPU, requires_grad=False, to numpy
     pred_score = upsample_self(pred_score, N) # Use Nearest Neighbor to extend from 320 to N
-    pred_score_key_frames = (pred_score>=0.5).type(torch.float32) # convert to key frames
+    pred_score_key_frames = (pred_score>=0.5).astype(np.float) # convert to key frames
     value = np.array([pred_score_key_frames[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
-    _, selected = knapsack(value, weight, int(0.15 * N)) # selected -> [66, 64, 51, 50, 44, 41, 40, 38, 34, 33, 31, 25, 24, 23, 20, 10, 9]
+    _, selected = knapsack(value, weight, int(0.15*N)) # selected -> [66, 64, 51, 50, 44, 41, 40, 38, 34, 33, 31, 25, 24, 23, 20, 10, 9]
     selected = selected[::-1] # inverse the selected list, which seg is selected
     key_shots = np.zeros(shape=(N, ))
     for i in selected:
@@ -51,7 +51,7 @@ def upsample_self(pred_score, N):
     """
     x = np.linspace(0, len(pred_score)-1, len(pred_score))
     f = interpolate.interp1d(x, pred_score, kind='nearest')
-    x_new = np.linspace(0, N-1, N); print(x_new, N)
+    x_new = np.linspace(0, len(pred_score)-1, N); #print(x_new, N)
     up_arr = f(x_new)
 
     return up_arr

@@ -212,12 +212,13 @@ def video2feature(video_path, idx, eccv16, gtscore):
     # handle labels
     cps = eccv16['video_'+idx]['change_points'][()] # [n_segs, 2]
     weight = eccv16['video_'+idx]['n_frame_per_seg'][()] # [n_segs]
+    n_frame = eccv16['video_'+idx]['n_frames'][()] # scalar
     gtscore = np.ravel(gtscore.transpose())
     value = np.array([gtscore[cp[0]:(cp[1]+1)].mean() for cp in cps])
     _, selected = eval_tools.knapsack(value, weight, int(0.15*length))
     selected = selected[::-1] # inverse the selected list, which seg is selected
-    key_shots = np.zeros(shape=(length, ))
-    key_frames = np.zeros(shape=(length, ))
+    key_shots = np.zeros(shape=(n_frame, ))
+    key_frames = np.zeros(shape=(n_frame, ))
     for i in selected:
         # key shot processing
         key_shots[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
@@ -249,7 +250,7 @@ def video2feature(video_path, idx, eccv16, gtscore):
     fea = fea[:320] # we only want 320 frames
     label = label[:320] # for training
 
-    return fea,label,cps,weight,length
+    return fea,label,cps,weight,n_frame
 
 
 def make_dataset_tvsum(videos_path, eccv16_data, GT_path, h5_data):
@@ -325,7 +326,7 @@ def make_dataset_summe(videos_path, eccv16_data, GT_path, h5_data):
 
 if __name__ == '__main__':
     # make_dataset for tvsum
-    #make_dataset_tvsum(tvsum_videos_path, tvsum_eccv16_data, tvsum_GT_path, tvsum_h5_data)
+    make_dataset_tvsum(tvsum_videos_path, tvsum_eccv16_data, tvsum_GT_path, tvsum_h5_data)
     # make dataset for summe
-    make_dataset_summe(summe_videos_path, summe_eccv16_data, summe_GT_path, summe_h5_data)
+    #make_dataset_summe(summe_videos_path, summe_eccv16_data, summe_GT_path, summe_h5_data)
     

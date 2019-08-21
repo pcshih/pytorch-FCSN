@@ -56,10 +56,10 @@ for i in range(len(train_loader_list)):
                 outputs_each = outputs[k,:,:].permute(1,0) #[2,320]->[320,2]
 
                 # loss criterion
-                label_each_float = label_each.type(torch.float32)
+                label_each_float = label_each.type(torch.float)
                 label_0 = 0.5*label_each_float.shape[0]/(label_each_float.shape[0]-label_each_float.sum())
                 label_1 = 0.5*label_each_float.shape[0]/label_each_float.sum()
-                weights = torch.tensor([label_0,label_1], dtype=torch.float32, device=device)
+                weights = torch.tensor([label_0,label_1], dtype=torch.float, device=device)
                 criterion = nn.CrossEntropyLoss(weight=weights)
 
                 classification_loss_sum += criterion(outputs_each, label_each)
@@ -134,7 +134,7 @@ for i in range(len(train_loader_list)):
             precision = eval_res_avg[0]
             recall = eval_res_avg[1]
             fscore = eval_res_avg[2]
-            print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
+            #print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
 
             model.train()
 
@@ -154,4 +154,4 @@ for i in range(len(train_loader_list)):
             
 
 # print eval fscore
-print("summe average fscore:{:.1%}".format(fscore_arr.mean()))
+print("tvsum average fscore:{:.1%}".format(fscore_arr.mean()))
