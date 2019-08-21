@@ -16,7 +16,7 @@ import eval_tools
 # batch_size
 BATCH_SIZE = 5
 # load training and testing dataset
-train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_tvsum.h5", "1D", BATCH_SIZE)
+train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_summe.h5", "1D", BATCH_SIZE)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
@@ -41,7 +41,6 @@ for i in range(len(train_loader_list)):
         for batch_i, (feature,label,_) in enumerate(train_loader_list[i]):
             feature = feature.to(device) #[5,1024,320]
             label = label.to(device) #[5,320]
-
             outputs = model(feature) # output shape [5,2,320]
 
             
@@ -109,8 +108,8 @@ for i in range(len(train_loader_list)):
                 N, pred_score_upsample, _, pred_summary = eval_tools.select_keyshots(video_info, pred_score)
                 true_summary_arr = video_info['user_summary'][()] # shape (n_users,N), summary from some users, each row is a binary vector
                 eval_res = [eval_tools.eval_metrics(pred_summary, true_summary) for true_summary in true_summary_arr] # shape [n_user,3],3 for[precision, recall, fscore]
-                eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
-                #eval_res = np.max(eval_res, axis=0).tolist()    # for summe
+                #eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
+                eval_res = np.max(eval_res, axis=0).tolist()    # for summe
                 eval_res_avg.append(eval_res) # [[precision1, recall1, fscore1], [precision2, recall2, fscore2]......]
 
                 # plot split 0 and first test histogram only save epoch4 and epoch last
@@ -134,7 +133,7 @@ for i in range(len(train_loader_list)):
             precision = eval_res_avg[0]
             recall = eval_res_avg[1]
             fscore = eval_res_avg[2]
-            #print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
+            print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%} loss:{}".format(i, epoch, precision, recall, fscore, total_loss))
 
             model.train()
 
@@ -142,7 +141,7 @@ for i in range(len(train_loader_list)):
             if((epoch+1)==EPOCHS):
                 # store fscore
                 fscore_arr[i] = fscore
-                print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
+                #print("split:{} epoch:{:0>3d} precision:{:.1%} recall:{:.1%} fscore:{:.1%}".format(i, epoch, precision, recall, fscore))
                 # release model from GPU
                 model = model.cpu()
                 torch.cuda.empty_cache()
@@ -154,4 +153,4 @@ for i in range(len(train_loader_list)):
             
 
 # print eval fscore
-print("tvsum average fscore:{:.1%}".format(fscore_arr.mean()))
+print("summe average fscore:{:.1%}".format(fscore_arr.mean()))

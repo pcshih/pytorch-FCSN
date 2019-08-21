@@ -6,7 +6,7 @@ from scipy import interpolate
 from knapsack import knapsack
 
 def eval_metrics(y_pred, y_true):
-    overlap = np.sum(y_pred * y_true)
+    overlap = np.sum(y_pred * y_true); #print(overlap, np.sum(y_pred))
     precision = overlap / (np.sum(y_pred) + 1e-8) # 預測為1且真正為1
     recall = overlap / (np.sum(y_true) + 1e-8) # 真正為1且model預測為1
     if precision == 0 and recall == 0:

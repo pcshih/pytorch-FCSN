@@ -319,7 +319,7 @@ def make_dataset_summe(videos_path, eccv16_data, GT_path, h5_data):
             idx = video_idx.split('_')[-1]
             fea,label,cps,n_frame_per_seg,length = video2feature(video_path, idx, eccv16, GT_mat['gt_score'])
             # user_summary
-            usr_sum_arr = GT_mat['user_score'].transpose() # [15~18,length]
+            usr_sum_arr = (GT_mat['user_score'].transpose()>0).astype(np.int) # [15~18,length]
 
             # save to dataset
             dataset = h5_f.create_group('video_'+idx)
@@ -339,7 +339,7 @@ def make_dataset_summe(videos_path, eccv16_data, GT_path, h5_data):
 
 if __name__ == '__main__':
     # make_dataset for tvsum
-    make_dataset_tvsum(tvsum_videos_path, tvsum_eccv16_data, tvsum_GT_path, tvsum_h5_data)
+    #make_dataset_tvsum(tvsum_videos_path, tvsum_eccv16_data, tvsum_GT_path, tvsum_h5_data)
     # make dataset for summe
-    #make_dataset_summe(summe_videos_path, summe_eccv16_data, summe_GT_path, summe_h5_data)
+    make_dataset_summe(summe_videos_path, summe_eccv16_data, summe_GT_path, summe_h5_data)
     
