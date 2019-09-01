@@ -34,6 +34,7 @@ def select_keyshots(video_info, pred_score):
     key_shots = np.zeros(shape=(N, ))
     for i in selected:
         key_shots[cps[i][0]:(cps[i][1]+1)] = 1 # assign 1 to seg
+        print("assign!!!")
     # N: total video length
     # pred_score: shape [N]
     # selected: which seg is selected

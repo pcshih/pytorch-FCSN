@@ -276,7 +276,7 @@ def make_dataset_tvsum(videos_path, eccv16_data, GT_path, h5_data):
                 usr_sum_arr = []
                 user_anno = GT_video[5].transpose()
                 n_users, n_frame = user_anno.shape # 20,length
-                for user_score in user_anno:
+                for user_score in user_anno: # for every user anno
                     value = np.array([user_score[cp[0]:(cp[1]+1)].mean() for cp in cps]) # [n_segments]
                     _, selected = eval_tools.knapsack(value, n_frame_per_seg, int(0.15*length))
                     selected = selected[::-1] # inverse the selected list, which seg is selected
