@@ -731,8 +731,8 @@ class FCSN_2D_unsup(nn.Module):
         h = self.upscore16(h)
         h = h[:, :, :, 27:27+x.size()[3]]; #print("before softmax:", h)
 
-        
-        h_softmax = self.softmax(h); #print("after softmax:", h_softmax)
+        # h*100 getting larger differences(tricks!!)
+        h_softmax = self.softmax(h*100); #print("after softmax:", h_softmax)
 
         # get simulated 0/1 vector
         mask = h_softmax[:,1,:].view(-1,1,1,320); #print("mask:", mask) # [5,1,1,320] use key frame score to be the mask

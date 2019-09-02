@@ -14,7 +14,7 @@ import eval_tools
 # configure training record
 #writer = SummaryWriter()
 # load training and testing dataset
-train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_tvsum.h5", "2D", 5)
+train_loader_list,test_dataset_list,data_file = get_loader("datasets/fcsn_summe.h5", "2D", 5)
 # device use for training and testing
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # number of epoch to train
@@ -127,8 +127,8 @@ for i in range(len(train_loader_list)):
                 _, _, _, pred_summary = eval_tools.select_keyshots(video_info, pred_score)
                 true_summary_arr = video_info['user_summary'][()] # shape (n_users,N), summary from some users, each row is a binary vector
                 eval_res = [eval_tools.eval_metrics(pred_summary, true_summary) for true_summary in true_summary_arr] # shape [n_user,3],3 for[precision, recall, fscore]
-                eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
-                #eval_res = np.max(eval_res, axis=0).tolist()    # for summe
+                #eval_res = np.mean(eval_res, axis=0).tolist()  # for tvsum
+                eval_res = np.max(eval_res, axis=0).tolist()    # for summe
                 eval_res_avg.append(eval_res) # [[precision1, recall1, fscore1], [precision2, recall2, fscore2]......]
                 
             eval_res_avg = np.mean(eval_res_avg, axis=0).tolist()

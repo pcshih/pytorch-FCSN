@@ -1,6 +1,7 @@
 import torch
 import numpy as np
-#h = torch.randn(1, 2, 5, requires_grad=True); print(h)
+h = torch.randn(1, 2, 1, 5, requires_grad=True); print(h)
+#h = h.view(2,5).permute(1,0); print(h) # [5,2]
 #val,idx = h.max(1, keepdim=True)
 #print(val)
 #print(idx)
@@ -14,7 +15,7 @@ import numpy as np
 #slice_sub = second_row - first_row; print(slice_sub)
 
 
-#z = torch.nn.Softmax(dim=1)(h); print(z)
+z_1 = torch.nn.Softmax(dim=1)(h*100); print(z_1)
 #z = torch.nn.functional.gumbel_softmax(h, tau=0.1, hard=False, dim=1); print(z)
 #z = torch.nn.functional.gumbel_softmax(h, tau=0.1, hard=True, dim=1); print(z)
 
