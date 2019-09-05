@@ -38,7 +38,6 @@ for i in range(len(train_loader_list)):
         for batch_i, (feature,label,_) in enumerate(train_loader_list[i]):
             feature = feature.to(device) #[5,1024,1,320]
 
-
             # zero the parameter gradients
             optimizer.zero_grad()
 

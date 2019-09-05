@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-h = torch.randn(1, 2, 1, 5, requires_grad=True); print(h)
+#h = torch.randn(1, 2, 1, 5, requires_grad=True); print(h)
 #h = h.view(2,5).permute(1,0); print(h) # [5,2]
 #val,idx = h.max(1, keepdim=True)
 #print(val)
@@ -15,7 +15,7 @@ h = torch.randn(1, 2, 1, 5, requires_grad=True); print(h)
 #slice_sub = second_row - first_row; print(slice_sub)
 
 
-z_1 = torch.nn.Softmax(dim=1)(h*100); print(z_1)
+#z_1 = torch.nn.Softmax(dim=1)(h*100); print(z_1)
 #z = torch.nn.functional.gumbel_softmax(h, tau=0.1, hard=False, dim=1); print(z)
 #z = torch.nn.functional.gumbel_softmax(h, tau=0.1, hard=True, dim=1); print(z)
 
@@ -110,6 +110,63 @@ class SoftArgmax1D(torch.nn.Module):
 # print(batch_variance)
 # print(1.0/batch_variance)
 #print(torch.mean((score-med_score)**2))
+
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        
+        self.conv11 = nn.Conv2d(3, 64, 3, padding = 1 )
+        self.pool1 = nn.AvgPool2d(2, 2)
+
+        self.conv21 = nn.Conv2d(64, 64*2, 3, padding = 1 )
+        self.pool2 = nn.AvgPool2d(2, 2)
+        
+        self.conv52 = nn.Conv2d(64*2, 10, 1)
+        self.pool5 = nn.AvgPool2d(8, 8)
+        
+    def forward(self, x):
+        
+        x = F.relu(self.conv11(x))
+        x = self.pool1(x)
+
+        x = F.relu(self.conv21(x))
+        x = self.pool2(x)
+        
+        x = self.conv52(x)
+        x = self.pool5(x)
+        
+        x = x.view(-1, 10)
+        return x
+    
+
+net = Net()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
+net.to(device)
+inputs = torch.rand(4,3,32,32)
+labels = torch.rand(4)*10//5
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
+inputs = inputs.to(device)
+labels = labels.to(device)
+
+outputs = net(inputs)
+
+loss = criterion(outputs, labels.long() )
+
+loss.backward()
+print("conv11", net.conv11.weight.grad)
+print("conv21", net.conv21.weight.grad)
+print("conv52", net.conv52.weight.grad)
+
+
+optimizer.step()
 
 
 

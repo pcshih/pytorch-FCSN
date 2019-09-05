@@ -54,6 +54,11 @@ for i in range(len(train_loader_list)):
 
             loss = criterion(outputs, label)
             loss.backward()
+            # print grad
+            print(model.upscore16.weight.grad)
+
+
+
             optimizer.step()
 
         # eval every 5 epoch
